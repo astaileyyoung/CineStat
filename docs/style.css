@@ -1,0 +1,186 @@
+/* ==========================================
+   1. CORE THEME & RESET
+   ========================================== */
+:root {
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --text-color: #f8fafc;
+    --accent-color: #38bdf8;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    position: relative; 
+}
+
+h1 span {
+    color: var(--accent-color);
+}
+
+/* ==========================================
+   2. NAVIGATION (Logo Left, Links Right)
+   ========================================== */
+.navbar {
+    height: 70px;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--accent-color);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+}
+
+.nav-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-logo { 
+    color: white; 
+    text-decoration: none; 
+    font-weight: bold; 
+    font-size: 1.5rem;
+}
+
+.nav-logo span { color: var(--accent-color); }
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 2rem;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links a {
+    color: #ffff;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--accent-color); }
+
+/* ==========================================
+   3. THE MAIN CONTAINER
+   ========================================== */
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem;
+    /* This centers the text for Home, but the Grid stays left-aligned naturally */
+    text-align: center; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+/* ==========================================
+   4. IFRAME / DASHBOARD STYLES (RESTORED)
+   ========================================== */
+.iframe-container {
+    width: 100%;
+    height: 80vh; /* This is 80% of the screen height */
+    min-height: 600px; /* Safety net so it never hits 0px */
+    display: block !important; /* Ensure no flexbox logic hides it */
+    position: relative;
+    background-color: #1e293b; /* If you see this color, the container is working */
+}
+
+/* 3. The Iframe must fill that container 100% */
+.iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+/* ==========================================
+   5. HOME & ARTICLE STYLES
+   ========================================== */
+.home-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+}
+
+.hero-image {
+    max-width: 100%;
+    max-height: 350px; 
+    border-radius: 8px;
+    margin: 1.5rem 0;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+}
+
+.dashboard-btn {
+    display: inline-block;
+    background: var(--accent-color);
+    color: var(--bg-color);
+    padding: 0.8rem 1.5rem;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    margin-top: 1rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    width: 100%; /* Forces the grid to use the full container width */
+    text-align: left; /* Keeps card text professional, not centered */
+    margin-top: 2rem;
+}
+
+.card { background: var(--card-bg); border-radius: 12px; overflow: hidden; border: 1px solid #334155; }
+.card-content { padding: 1.5rem; }
+.card img { width: 100%; height: 180px; object-fit: cover; }
+
+.read-more {
+    color: var(--accent-color) !important; /* Forces it to stay Blue */
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: opacity 0.2s;
+}
+
+.read-more:visited {
+    color: var(--accent-color) !important; /* Kills the purple */
+}
+
+.read-more:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+/* ==========================================
+   6. FOOTER (Bottom Anchored)
+   ========================================== */
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    color: #64748b;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+

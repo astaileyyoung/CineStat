@@ -3,31 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CineStat | Data-Driven Cinema</title>
+    <title>Dashboard | CineStat</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="centered-layout">
+<body class="analysis-layout">
     <nav class="navbar">
         <div class="nav-container">
             <a href="index.html" class="nav-logo">Cine<span>Stat</span></a>
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="dashboard.html">Dashboard</a></li>
-                <li><a href="analyses.html">Articles</a></li>
+                <li><a href="analyses.html">Analyses</a></li>
                 <li><a href="https://github.com/astaileyyoung/CineFace" target="_blank">CineFace</a></li>
             </ul>
         </div>
     </nav>
-
+    
     <div class="container">
-        <div class="home-content">
-            <h1>Cine<span>Stat</span></h1>
-            <img src="./assets/mom_drawn.png", class="hero-image">
-            <p>A portal for cinema statistics and data visualization. A work in progress.</p>
-            <!-- <div class="badge">Coming Soon</div> -->
-
-            <a href="dashboard.html" class="dashboard-btn">View Live Dashboard</a>
-            <a href="analyses.html" style="color: #38bdf8; display: block; margin-top: 1rem; text-decoration: none;">Read my Articles</a>
+        <div class="iframe-container">
+            <iframe class="iframe" 
+                title="cineface_dev" 
+                src="https://app.powerbi.com/view?r=eyJrIjoiMWE4YzViOWMtY2RiYy00ZTk1LWExNTgtMTg5YjZjNTE2NjIzIiwidCI6ImI3Yzk1YTkyLTBlYWQtNDRlOS04YjgzLTdjMGY5NmNiMDUyMSIsImMiOjF9" 
+                frameborder="0" 
+                allowFullScreen="true">
+            </iframe>
         </div>
     </div>
 
@@ -37,3 +36,5 @@
 
 </body>
 </html>
+
+
