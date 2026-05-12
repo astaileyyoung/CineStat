@@ -91,22 +91,30 @@ h1 span {
 /* ==========================================
    4. IFRAME / DASHBOARD STYLES (RESTORED)
    ========================================== */
-.iframe-container {
+/* 1. Add a specific class to handle full-width layouts */
+.container.full-width {
+    max-width: 100%; /* Remove the 1100px limit */
     width: 100%;
-    height: 80vh; /* This is 80% of the screen height */
-    min-height: 600px; /* Safety net so it never hits 0px */
-    display: block !important; /* Ensure no flexbox logic hides it */
-    position: relative;
-    background-color: #1e293b; /* If you see this color, the container is working */
+    padding: 0;     /* Remove padding so it touches the edges */
+    margin: 0;
 }
 
-/* 3. The Iframe must fill that container 100% */
+/* 2. Fix the iframe container height and behavior */
+.iframe-container {
+    width: 100%;
+    /* Use calc to subtract navbar(70px) and footer(80px) from the total height */
+    height: calc(100vh - 150px); 
+    min-height: 700px; 
+    background-color: #1e293b;
+}
+
+/* 3. Ensure the iframe fills every pixel */
 .iframe {
     width: 100%;
     height: 100%;
     border: none;
-    display: block;
 }
+
 /* ==========================================
    5. HOME & ARTICLE STYLES
    ========================================== */
