@@ -10,13 +10,19 @@
 
 * { box-sizing: border-box; }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
     font-family: sans-serif;
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Prevents double scrollbars with full-page scroll */
+    /* CHANGED: Reverted to standard browser scrolling defaults */
+    overflow-x: hidden; 
+    overflow-y: auto;   
     min-height: 100vh;
     position: relative; 
 }
@@ -25,9 +31,6 @@ h1 span, h2 span {
     color: var(--accent-color);
 }
 
-html {
-    scroll-behavior: smooth;
-}
 
 /* ==========================================
    2. NAVIGATION (Logo Left, Links Right)
@@ -123,6 +126,11 @@ html {
 /* ==========================================
    3. THE MAIN CONTAINER & SCROLLING SPLIT LAYOUT
    ========================================== */
+body.home-scroll-layout {
+    overflow: hidden;
+    height: 100vh;
+}
+
 .scroll-container {
     height: 100vh;
     overflow-y: scroll;
@@ -139,7 +147,8 @@ html {
     scroll-snap-align: start;
     position: relative;
     box-sizing: border-box;
-    padding-top: 70px; 
+    /* INCREASED: Pushes the entire container content down further safely on desktop */
+    padding-top: 100px; 
 }
 
 /* Background panel accents */
@@ -170,8 +179,10 @@ html {
 }
 
 .section-text h1 {
-    font-size: 3.5rem; /* Emphasized logo headline text scaling */
-    margin: 0 0 1rem 0;
+    font-size: 3.5rem;
+    /* MODIFIED: Changed from 0 to a small top margin to ensure breathing room below the navbar */
+    margin: 2rem 0 3rem 0; 
+    line-height: 1.2;
 }
 
 .section-text h2 {
@@ -341,11 +352,14 @@ html {
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 2rem;
+    /* CHANGED: Swapped auto-fill to auto-fit so cards expand evenly, or cap them cleanly */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 400px));
+    gap: 2.5rem;
     width: 100%; 
+    max-width: 900px; /* Constraints the grid container so 2 cards don't float apart */
+    margin: 3rem auto 0 auto; /* Centering the grid layout box horizontally */
     text-align: left; 
-    margin-top: 2rem;
+    justify-content: center; /* Forces the internal cards to center if there is leftover space */
 }
 
 .card { background: var(--card-bg); border-radius: 12px; overflow: hidden; border: 1px solid #334155; }
@@ -383,4 +397,71 @@ footer {
     font-size: 0.85rem;
     color: #64748b;
     border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+/* ==========================================
+   7. FIXED FULL-SCREEN DASHBOARD ENGINE
+   ========================================== */
+
+/* Turn the body into a flexbox column that locks exactly to the screen height */
+body.dashboard-page-body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    min-height: 100vh;
+    overflow: hidden; /* Stops the overall browser page from scrolling vertically */
+    position: relative;
+}
+
+/* Ensure the navbar remains standard at the top of the column */
+body.dashboard-page-body .navbar {
+    position: static; /* Drops fixed positioning here so it plays nice with the flex layout */
+    flex-shrink: 0;   /* Prevents the navbar from compressing */
+}
+
+/* The content container expands to claim all empty space between nav and footer */
+body.dashboard-page-body .container.full-width {
+    flex: 1; 
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+
+/* Strip out the hard calc() height and let flexbox handle it dynamically */
+body.dashboard-page-body .iframe-container {
+    width: 100%;
+    height: 100%; /* Automatically fills the container exactly */
+    min-height: 0; /* Prevents default iframe blowouts */
+    flex: 1;
+}
+
+body.dashboard-page-body .iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+
+/* Unpin the footer from absolute bottom so it doesn't overlap your canvas metrics */
+body.dashboard-page-body footer {
+    position: static; /* Drops absolute positioning */
+    flex-shrink: 0;   /* Prevents the footer from squishing */
+    height: 50px;     /* Slid down from 80px to save precious vertical canvas space for data */
+    background: var(--bg-color);
+}
+
+/* ==========================================
+   8. ARTICLE LIST CLEANUP
+   ========================================== */
+body.analysis-layout {
+    padding-top: 100px; /* Safely clears the fixed navbar height */
+}
+
+body.analysis-layout h1 {
+    margin-bottom: 2rem;
+    color: var(--text-color);
 }
