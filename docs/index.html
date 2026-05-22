@@ -6,35 +6,83 @@
     <title>CineStat | Data-Driven Cinema</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="centered-layout">
+<body>
+
+    <!-- Hybrid Navbar: Link straight to separate pages -->
     <nav class="navbar">
         <div class="nav-container">
             <a href="index.html" class="nav-logo">Cine<span>Stat</span></a>
             <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html" class="active">Home</a></li>
                 <li><a href="dashboard.html">Dashboard</a></li>
                 <li><a href="analyses.html">Articles</a></li>
-                <li><a href="https://huggingface.co/datasets/astaileyyoung/CineStat/tree/main" target="_blank">Download Data</a></li>
+                <li><a href="https://huggingface.co/datasets/astaileyyoung/CineStat/tree/main" target="_blank">Data</a></li>
             </ul>
         </div>
     </nav>
 
-    <div class="container">
-        <div class="home-content">
-            <h1>Cine<span>Stat</span></h1>
-            <img src="./assets/mom_drawn.png", class="hero-image">
-            <p>A portal for cinema statistics and data visualization. A work in progress.</p>
-            <!-- <div class="badge">Coming Soon</div> -->
+    <!-- Scroll Container -->
+    <main class="scroll-container">
+        
+        <!-- Section 1: Home / Hero -->
+        <section id="home" class="scroll-section hero-section">
+            <div class="section-split">
+                <div class="section-text">
+                    <h1>Cine<span>Stat</span></h1>
+                    <p>A portal for cinema statistics and data visualization. A work in progress.</p>
+                    <a href="#dashboard" class="scroll-down-btn">Explore Features ↓</a>
+                </div>
+                <div class="section-image-wrapper">
+                    <img src="./assets/mom_drawn.png" class="panel-image" alt="CineStat Hero">
+                </div>
+            </div>
+        </section>
 
-            <a href="dashboard.html" class="dashboard-btn">View Live Dashboard</a>
-            <a href="analyses.html" style="color: #38bdf8; display: block; margin-top: 1rem; text-decoration: none;">Read my Articles</a>
-            <a href="https://huggingface.co/datasets/astaileyyoung/CineStat/tree/main" style="color: #38bdf8; display: block; margin-top: 1rem; text-decoration: none;">Download Data</a>
-        </div>
-    </div>
+        <!-- Section 2: Dashboard -->
+        <section id="dashboard" class="scroll-section dashboard-section">
+            <div class="section-split reverse"> <!-- 'reverse' flips image and text sides for visual variety -->
+                <div class="section-text">
+                    <h2>Live <span>Dashboard</span></h2>
+                    <p>Interact with cross-filtered charts, box office metrics, and custom statistical layouts built directly from our movie databases.</p>
+                    <a href="dashboard.html" class="action-btn">Open Live Dashboard →</a>
+                </div>
+                <div class="section-image-wrapper">
+                    <!-- Replace with a localized screenshot of your actual Power BI dashboard later -->
+                    <img src="./assets/dashboard_preview.png" class="panel-image" alt="Dashboard Analytics Preview">
+                </div>
+            </div>
+        </section>
 
-    <footer>
-        &copy; 2026 Cinestat.org • amosstaileyyoung@gmail.com
-    </footer>
+        <!-- Section 3: Analyses / Articles -->
+        <section id="analyses" class="scroll-section analyses-section">
+            <div class="section-split">
+                <div class="section-text">
+                    <h2>Deep-Dive <span>Articles</span></h2>
+                    <p>Empirical film analysis and essays. We look at trends in aspect ratios, staging, framing metrics, and distribution models over cinema history.</p>
+                    <a href="analyses.html" class="action-btn">Read Articles →</a>
+                </div>
+                <div class="section-image-wrapper">
+                    <!-- Replace with an article graphic or movie still later -->
+                    <img src="./assets/casablanca_gridmap.png" class="panel-image" alt="Film Analysis Graphics">
+                </div>
+            </div>
+        </section>
 
+        <!-- Section 4: Data Download -->
+        <section id="data" class="scroll-section data-section">
+            <div class="section-split reverse">
+                <div class="section-text">
+                    <h2>Open <span>Data</span></h2>
+                    <p>Cleaned datasets hosted transparently. Access raw pipeline outputs and tables via Hugging Face to run your own custom scripts.</p>
+                    <a href="https://huggingface.co/datasets/astaileyyoung/CineStat/tree/main" target="_blank" class="action-btn">Download Datasets →</a>
+                </div>
+            </div>
+            
+            <footer>
+                &copy; 2026 Cinestat.org • amosstaileyyoung@gmail.com
+            </footer>
+        </section>
+
+    </main>
 </body>
 </html>
