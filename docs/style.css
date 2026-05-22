@@ -34,21 +34,22 @@ html {
    ========================================== */
 .navbar {
     height: 70px;
-    background: rgba(30, 41, 59, 0.95); /* Using var(--card-bg) with modern transparency */
-    backdrop-filter: blur(8px); /* Frosted-glass look over scrolling panels */
+    background: rgba(30, 41, 59, 0.95); 
+    backdrop-filter: blur(8px); 
     border-bottom: 1px solid var(--accent-color);
-    position: fixed; /* Fixed is required so it stays floating during full-page snapping */
+    position: fixed; 
     top: 0;
     left: 0;
     width: 100%;
     z-index: 1000;
     display: flex;
     align-items: center;
+    transition: height 0.3s ease; /* Smooth transition if height changes */
 }
 
 .nav-container {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1400px; /* Matched to your wider split container limit */
     margin: 0 auto;
     padding: 0 2rem;
     display: flex;
@@ -61,6 +62,7 @@ html {
     text-decoration: none; 
     font-weight: bold; 
     font-size: 1.5rem;
+    white-space: nowrap; /* Prevents Cine and Stat from snapping to two lines */
 }
 
 .nav-logo span { color: var(--accent-color); }
@@ -77,10 +79,46 @@ html {
     color: #ffffff;
     text-decoration: none;
     font-size: 0.9rem;
+    font-weight: 500;
     transition: color 0.2s;
+    white-space: nowrap; /* Keeps link text like "Download Data" on a single line */
 }
 
-.nav-links a:hover { color: var(--accent-color); }
+.nav-links a:hover, .nav-links a.active { 
+    color: var(--accent-color); 
+}
+
+/* ==========================================
+   MOBILE NAVBAR OVERRIDE (Below 768px)
+   ========================================== */
+@media (max-width: 768px) {
+    .navbar {
+        height: auto; /* Allow navbar to grow vertically to hold two rows */
+        padding: 1rem 0;
+    }
+
+    .nav-container {
+        flex-direction: column; /* Stack logo on top, links underneath */
+        gap: 1rem;
+        padding: 0 1rem;
+    }
+
+    .nav-links {
+        width: 100%;
+        justify-content: center; /* Center the links under the logo */
+        gap: 1.2rem; /* Tighter gap so everything fits across a phone screen */
+        flex-wrap: wrap; /* Allows links to cleanly drop to a second line if a phone is tiny */
+    }
+
+    .nav-links a {
+        font-size: 0.85rem; /* Marginally smaller text for handheld screens */
+    }
+
+    /* Adjust the main page scroll container padding so the taller mobile navbar doesn't cover content */
+    .scroll-section {
+        padding-top: 110px; 
+    }
+}
 
 /* ==========================================
    3. THE MAIN CONTAINER & SCROLLING SPLIT LAYOUT
