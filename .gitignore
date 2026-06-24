@@ -1,2 +1,6 @@
 *.duckdb
 *__pycache__*
+.env
+plots/
+newplot.png
+*.parquet

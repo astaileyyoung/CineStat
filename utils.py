@@ -98,22 +98,6 @@ def get_sample_grid(engine):
     return (grid_norm * 100).round(1)
 
 
-def get_director_grid(name, engine):
-    with engine.connect() as conn:
-        query = f"""
-            SELECT 
-                AVG(pct_tl), AVG(pct_tc) as tc, AVG(pct_tr) as tr,
-                AVG(pct_ml), AVG(pct_mc) as mc, AVG(pct_mr) as mr,
-                AVG(pct_bl), AVG(pct_bc) as bc, AVG(pct_br) as br
-            FROM vwWorksByDirector
-            WHERE person_name = '{name}'
-        """
-        df = pd.read_sql_query(db.text(query), conn)
-    grid = df.values.reshape(3, 3)
-    grid_norm = grid / grid.sum()
-    return (grid_norm * 100).round(1)
-
-
 def plot_grid(grid, plot_title=None, width=600, height=600, layout=None, dst=None, transparent=False):
     # Center the color scale at zero
     limit = max(abs(grid.min()), abs(grid.max()))
@@ -163,11 +147,6 @@ def plot_sample_grid(engine, plot_title=None, layout=None, dst=None):
     plot_grid(grid_norm, plot_title=plot_title, layout=layout, dst=dst)
 
 
-def plot_director_grid(engine, plot_title=None, layout=None, dst=None):
-    grid_norm = get_director_grid(engine)
-    plot_grid(grid_norm, plot_title=plot_title, layout=layout, dst=dst)
-
-
 def compare_director_to_sample_grid(name, 
                                     engine, 
                                     title=None, 
@@ -182,7 +161,7 @@ def compare_director_to_sample_grid(name,
                 AVG(pct_tl), AVG(pct_tc) as tc, AVG(pct_tr) as tr,
                 AVG(pct_ml), AVG(pct_mc) as mc, AVG(pct_mr) as mr,
                 AVG(pct_bl), AVG(pct_bc) as bc, AVG(pct_br) as br
-            FROM vwGridByJob gbj
+            FROM CineFaceDW.vwGridByJob gbj
             WHERE gbj.name = '{name}' AND gbj.job_name = 'Director'
             GROUP BY gbj.name
             """
@@ -878,7 +857,44 @@ def plot_titles(df, x, y, trendline_options=None):
     fig.show()
 
 
-def plot_directors(df, x, y, trendline_options=None, hover_data=None):
+# def plot_directors(df, x, y, trendline_options=None, hover_data=None, xaxis=None, yaxis=None):
+#     if not trendline_options:
+#         trendline_options = {}
+
+#     fig = px.scatter(
+#         df, 
+#         x=x, 
+#         y=y, 
+#         color_discrete_sequence=["#79b8b8"], 
+#         hover_data=hover_data,
+#         trendline='ols',
+#         trendline_options=trendline_options
+#     )
+#     fig.update_layout(layout)
+#     fig.update_layout(
+#         xaxis=dict(title=x if not xaxis else xaxis),
+#         yaxis=dict(title=y if not yaxis else yaxis)
+#     )
+#     # fig.update_traces(line_width=4)
+#     fig.update_traces(marker=dict(size=8, line=dict(width=1, color="white")))
+#     fig.update_traces(selector=dict(mode="lines"), line=dict(dash="dash", color="#d81275", width=5), name="Trend")
+#     fig.show()
+
+
+def plot_directors(df, 
+                   x, 
+                   y, 
+                   trendline_options=None, 
+                   hover_data=None, 
+                   xaxis=None, 
+                   yaxis=None, 
+                   dst=None, 
+                   width=800, 
+                   height=600,
+                   layout=None,
+                   plot_title=None,
+                   xaxis_title=None,
+                   yaxis_title=None):
     if not trendline_options:
         trendline_options = {}
 
@@ -886,19 +902,59 @@ def plot_directors(df, x, y, trendline_options=None, hover_data=None):
         df, 
         x=x, 
         y=y, 
-        color_discrete_sequence=["#79b8b8"], 
+        color_discrete_sequence=["#E100FF"], 
         hover_data=hover_data,
         trendline='ols',
-        trendline_options=trendline_options
+        trendline_options=trendline_options,
+        labels={
+            x: xaxis_title if xaxis_title else x,
+            y: yaxis_title if yaxis_title else y
+        }
     )
-    fig.update_layout(layout)
+    if layout:
+        fig.update_layout(layout)
+        
     fig.update_layout(
-        xaxis=dict(title=x),
-        yaxis=dict(title=y)
+        xaxis=dict(title=x if not xaxis else xaxis),
+        yaxis=dict(title=y if not yaxis else yaxis),
+        title=dict(
+            text=plot_title,
+            x=0.5,
+            y=0.95
+        ),
+        width=width,
+        height=height
     )
-    # fig.update_traces(line_width=4)
-    fig.update_traces(marker=dict(size=8, line=dict(width=1, color="white")))
-    fig.update_traces(selector=dict(mode="lines"), line=dict(dash="dash", color="#d81275", width=5), name="Trend")
+    fig.update_traces(
+    marker=dict(
+        size=10, 
+        line=dict(
+            width=2, 
+            color="white")
+            ),
+    line=dict(
+        dash="dash", 
+        color="#E0E2E5", 
+        width=6),
+    hoverlabel=dict(
+        bgcolor="white",
+        font_size=16,
+        font_color="black"
+        )
+    )
+    fig.update_xaxes(
+        showgrid=True,
+        gridwidth=1,
+        gridcolor="rgba(255, 255, 255, 0.25)"
+    )
+    fig.update_yaxes(
+        showgrid=True,
+        gridwidth=1,
+        gridcolor="rgba(255, 255, 255, 0.25)"
+    )
+
+    if dst:
+        fig.write_image(dst, width=width, height=height, scale=2)
     fig.show()
 
 
@@ -1138,3 +1194,23 @@ def compare_film_to_sample_grid(title, engine, plot_title=None):
 
     diff_grid = title_grid - avg_grid_norm
     plot_grid(diff_grid, plot_title=plot_title)
+
+
+def calculate_moe(n, N, confidence_level=0.95):
+    import math 
+    
+    if n == 0:
+        return float('inf')
+    
+    # Z-score for 95% confidence
+    z = 1.96 
+    # Assumed sample proportion (0.5 gives the most conservative/maximum error estimate)
+    p = 0.5 
+    
+    # Standard Error
+    se = math.sqrt((p * (1 - p)) / n)
+    
+    # Finite Population Correction Factor
+    fpc = math.sqrt((N - n) / (N - 1)) if N > 1 else 1.0
+    
+    return z * se * fpc
