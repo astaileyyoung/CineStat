@@ -1,3 +1,6 @@
+import os
+import json
+import base64
 import logging
 import itertools
 
@@ -5,10 +8,12 @@ import cv2
 import numpy as np
 import pandas as pd 
 import sqlalchemy as db
+import plotly.io as pio
 import plotly.express as px
 import plotly.graph_objs as go
 import scipy.ndimage as ndimage
 from scipy.spatial import distance
+from weasyprint import HTML
 
 
 handler = logging.StreamHandler()
@@ -833,7 +838,19 @@ def create_gridmap_from_director(director,
         fig.write_image(dst, width=width, height=height, scale=2)
 
 
-def plot_titles(df, x, y, trendline_options=None):
+def plot_titles(df, 
+                x, 
+                y, 
+                xaxis=None,
+                yaxis=None,
+                trendline_options=None, 
+                plot_title=None,
+                layout=None,
+                width=960,
+                height=540,
+                color="#E100FF",
+                x_range=None,
+                y_range=None):
     if not trendline_options:
         trendline_options = {}
 
@@ -841,20 +858,72 @@ def plot_titles(df, x, y, trendline_options=None):
         df, 
         x=x, 
         y=y, 
-        color_discrete_sequence=["#79b8b8"], 
+        color_discrete_sequence=[color], 
         hover_data=["title", "imdb_id", "directors", "year"],
         trendline='ols',
         trendline_options=trendline_options
     )
-    fig.update_layout(layout)
+    if layout:
+        fig.update_layout(layout)
+
     fig.update_layout(
-        xaxis=dict(title=x),
-        yaxis=dict(title=y)
+        xaxis=dict(title=x if not xaxis else xaxis),
+        yaxis=dict(title=y if not yaxis else yaxis),
+        title=dict(
+            text=plot_title,
+            x=0.5,
+            y=0.95
+        ),
+        width=width,
+        height=height
     )
-    # fig.update_traces(line_width=4)
-    fig.update_traces(marker=dict(size=8, line=dict(width=1, color="white")))
-    fig.update_traces(selector=dict(mode="lines"), line=dict(dash="dash", color="#d81275", width=5), name="Trend")
+    fig.update_traces(
+        marker=dict(
+            size=10, 
+            line=dict(
+                width=2, 
+                color="white")
+                ),
+        line=dict(
+            dash="dash", 
+            color="#E0E2E5", 
+            width=6),
+        hoverlabel=dict(
+            bgcolor="white",
+            font_size=16,
+            font_color="black"
+        )
+    )
+    fig.update_xaxes(
+        showgrid=True,
+        gridwidth=1,
+        gridcolor="rgba(255, 255, 255, 0.25)"
+    )
+    fig.update_yaxes(
+        showgrid=True,
+        gridwidth=1,
+        gridcolor="rgba(255, 255, 255, 0.25)"
+    )
+    
+    if x_range:
+        if len(x_range) == 1:
+            # Dynamically calculate max from data with 5% padding
+            max_val = df[x].max() * 1.05
+            fig.update_xaxes(range=[x_range[0], max_val])
+        else:
+            fig.update_xaxes(range=x_range)
+    
+    # Handle Y Axis Range
+    if y_range:
+        if len(y_range) == 1: 
+            # Dynamically calculate max from data with 5% padding
+            max_val = df[y].max() * 1.05
+            fig.update_yaxes(range=[y_range[0], max_val])
+        else:
+            fig.update_yaxes(range=y_range)
+
     fig.show()
+
 
 
 # def plot_directors(df, x, y, trendline_options=None, hover_data=None, xaxis=None, yaxis=None):
@@ -926,20 +995,20 @@ def plot_directors(df,
         height=height
     )
     fig.update_traces(
-    marker=dict(
-        size=10, 
+        marker=dict(
+            size=10, 
+            line=dict(
+                width=2, 
+                color="white")
+                ),
         line=dict(
-            width=2, 
-            color="white")
-            ),
-    line=dict(
-        dash="dash", 
-        color="#E0E2E5", 
-        width=6),
-    hoverlabel=dict(
-        bgcolor="white",
-        font_size=16,
-        font_color="black"
+            dash="dash", 
+            color="#E0E2E5", 
+            width=6),
+        hoverlabel=dict(
+            bgcolor="white",
+            font_size=16,
+            font_color="black"
         )
     )
     fig.update_xaxes(
@@ -1170,7 +1239,7 @@ def compare_film_to_sample_heat(title, engine):
     plot_comparison(residual)
 
 
-def compare_film_to_sample_grid(title, engine, plot_title=None):
+def compare_film_to_sample_grid(title, engine, plot_title=None, layout=None):
     avg_grid_norm = get_sample_grid(engine)
 
     imdb_id = imdb_from_title(title, engine)
@@ -1190,10 +1259,10 @@ def compare_film_to_sample_grid(title, engine, plot_title=None):
             WHERE imdb_id = :imdb_id
         """
         df = pd.read_sql_query(db.text(query), conn, params={"imdb_id": imdb_id})
-    title_grid = np.array(df.values).reshape(3, 3)
+    title_grid = (np.array(df.values).reshape(3, 3) * 100).round(1)
 
     diff_grid = title_grid - avg_grid_norm
-    plot_grid(diff_grid, plot_title=plot_title)
+    plot_grid(diff_grid, plot_title=plot_title, layout=layout)
 
 
 def calculate_moe(n, N, confidence_level=0.95):
@@ -1214,3 +1283,147 @@ def calculate_moe(n, N, confidence_level=0.95):
     fpc = math.sqrt((N - n) / (N - 1)) if N > 1 else 1.0
     
     return z * se * fpc
+
+
+def generate_report(notebook_path, html_out, pdf_out):    
+    if not os.path.exists(notebook_path):
+        print(f"Error: Could not find {notebook_path}")
+        return
+
+    with open(notebook_path, 'r', encoding='utf-8') as f:
+        nb = json.load(f)
+
+    content_html = ""
+    plot_counter = 0
+
+    for cell in nb.get('cells', []):
+        if cell['cell_type'] == 'markdown':
+            text = "".join(cell['source'])
+            if text.startswith('# '):
+                content_html += f"<h1>{text[2:]}</h1>\n"
+            elif text.startswith('## '):
+                content_html += f"<h2>{text[3:]}</h2>\n"
+            elif text.startswith('### '):
+                content_html += f"<h3>{text[4:]}</h3>\n"
+            else:
+                content_html += f"<p>{text}</p>\n"
+                
+        elif cell['cell_type'] == 'code':
+            for output in cell.get('outputs', []):
+                data = output.get('data', {})
+                
+                # Check if this cell contains a Plotly chart structure
+                is_plotly = False
+                plotly_data = None
+                
+                if 'application/vnd.plotly.v1+json' in data:
+                    plotly_data = data['application/vnd.plotly.v1+json']
+                    is_plotly = True
+                elif 'text/html' in data:
+                    html_str = "".join(data['text/html'])
+                    # If the HTML output contains the Plotly javascript trigger
+                    if 'Plotly.newPlot' in html_str or 'window.Plotly' in html_str:
+                        is_plotly = True
+                
+                if is_plotly:
+                    try:
+                        plot_counter += 1
+                        print(f"Extracting and rendering Plotly figure {plot_counter}...")
+                        
+                        if plotly_data:
+                            # Reconstruct figure from clean JSON data block
+                            fig = pio.from_json(json.dumps(plotly_data))
+                        else:
+                            # Fallback: If it's pure HTML, we will export the static image 
+                            # directly using the figure cached in the notebook's standard outputs
+                            if 'image/png' in data:
+                                img_data = data['image/png']
+                                if isinstance(img_data, list):
+                                    img_data = "".join(img_data)
+                                content_html += f"<div class='plot-container'><img src='data:image/png;base64,{img_data.strip()}'></div>\n"
+                                continue
+                            else:
+                                # Look into metadata if data block is masked
+                                fig_meta = output.get('metadata', {}).get('plotly', {})
+                                if fig_meta:
+                                    fig = pio.from_json(json.dumps(fig_meta))
+                                else:
+                                    continue
+
+                        # Force compile the reconstructed figure to a high-res static PNG byte string
+                        img_bytes = pio.to_image(fig, format="png", width=960, height=540, scale=2)
+                        import base64
+                        b64_string = base64.b64encode(img_bytes).decode('utf-8')
+                        
+                        content_html += f"<div class='plot-container'><img src='data:image/png;base64,{b64_string}'></div>\n"
+                    except Exception as e:
+                        print(f"Skipping plot render due to engine variance: {e}")
+                        # Final safety fallback to standard raw image extraction if to_image complains
+                        if 'image/png' in data:
+                            img_data = data['image/png']
+                            if isinstance(img_data, list):
+                                img_data = "".join(img_data)
+                            content_html += f"<div class='plot-container'><img src='data:image/png;base64,{img_data.strip()}'></div>\n"
+
+    # Define layout formatting
+    html_template = f"""<!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="utf-8">
+    <style>
+        @page {{
+            size: A4;
+            margin: 20mm 15mm;
+            @bottom-right {{
+                content: counter(page);
+                font-family: 'Helvetica Neue', Arial, sans-serif;
+                font-size: 9pt;
+                color: #8a9099;
+            }}
+            @bottom-left {{
+                content: "CineStat Research Baselines";
+                font-family: 'Helvetica Neue', Arial, sans-serif;
+                font-size: 9pt;
+                color: #8a9099;
+            }}
+        }}
+        body {{
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            color: #2c3e50;
+            line-height: 1.6;
+            font-size: 10.5pt;
+        }}
+        h1 {{
+            font-size: 20pt;
+            color: #1a252f;
+            border-bottom: 2px solid #eef0f2;
+            padding-bottom: 12px;
+        }}
+        h2 {{
+            font-size: 14pt;
+            color: #2c3e50;
+            border-left: 4px solid #E100FF;
+            padding-left: 10px;
+            margin-top: 24px;
+        }}
+        p {{ text-align: justify; margin-bottom: 14px; }}
+        .plot-container {{
+            margin: 25px 0;
+            padding: 10px;
+            background: #ffffff;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            page-break-inside: avoid;
+            text-align: center;
+        }}
+        .plot-container img {{ max-width: 100%; height: auto; }}
+    </style>
+    </head>
+    <body>{content_html}</body>
+    </html>"""
+
+    with open(html_out, 'w', encoding='utf-8') as f:
+        f.write(html_template)
+
+    HTML(html_out).write_pdf(pdf_out)
+    print(f"\nSuccessfully generated clean report with figures: {pdf_out}")

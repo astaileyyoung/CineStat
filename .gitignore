@@ -4,3 +4,4 @@
 plots/
 newplot.png
 *.parquet
+*.cache
